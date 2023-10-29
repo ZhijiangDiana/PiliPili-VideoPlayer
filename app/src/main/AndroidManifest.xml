@@ -19,11 +19,12 @@
         <activity
             android:name=".VideoViewTest"
             android:exported="false"/>
+        <!-- android4.0之后刷新豁免需要加上screenSize -->
         <activity
             android:name=".Player"
             android:exported="false"
             android:screenOrientation="sensor"
-            android:configChanges="orientation|keyboardHidden"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/FullScreen"/>
         <activity
             android:name=".MainActivity"

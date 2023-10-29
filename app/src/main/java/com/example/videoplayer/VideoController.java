@@ -132,23 +132,27 @@ public class VideoController extends RelativeLayout implements OnClickListener, 
 	@Override
 	public void onStartTrackingTouch(SeekBar seekBar) {
 		// 拖动进度条时要暂停视频
-		if (mMovieView.isPlaying()) {
-			mMovieView.pause();
-			bPause = true;
+		if(mMovieView != null) {
+			if (mMovieView.isPlaying()) {
+				mMovieView.pause();
+				bPause = true;
+			}
+			mSeekListener.onStartSeek();
 		}
-		mSeekListener.onStartSeek();
 	}
 
 	@Override
 	public void onStopTrackingTouch(SeekBar seekBar) {
-		mSeekListener.onStopSeek();
-		// 拖动进度条时要暂停视频
-		if(!mMovieView.isPlaying()) {
-			if (mCurrent == 0) {
-				mMovieView.begin(null);
+		if(mMovieView != null) {
+			mSeekListener.onStopSeek();
+			// 拖动进度条时要暂停视频
+			if (!mMovieView.isPlaying()) {
+				if (mCurrent == 0) {
+					mMovieView.begin(null);
+				}
+				mMovieView.start();
+				bPause = false;
 			}
-			mMovieView.start();
-			bPause = false;
 		}
 	}
 	

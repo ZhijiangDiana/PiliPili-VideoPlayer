@@ -25,6 +25,7 @@ public class MovieView extends VideoView implements View.OnTouchListener, View.O
     private View mTopView;
     private View mBottomView;
     private Handler mHandler = new Handler();
+    private String vPath;
 
     public MovieView(Context context) {
         super(context, null);
@@ -121,4 +122,14 @@ public class MovieView extends VideoView implements View.OnTouchListener, View.O
             showOrHide();
         }
     };
+
+    @Override
+    public void setVideoPath(String path) {
+        super.setVideoPath(path);
+        vPath = path;
+    }
+
+    public String getVideoPath() {
+        return vPath;
+    }
 }

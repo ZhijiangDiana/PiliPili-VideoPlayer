@@ -6,8 +6,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import org.jetbrains.annotations.NotNull;
 
 public class Player extends AppCompatActivity implements
         View.OnClickListener, VideoController.OnSeekChangeListener {
@@ -30,6 +32,14 @@ public class Player extends AppCompatActivity implements
         mv_content.prepare(rl_top, vc_play);
         tv_open.setOnClickListener(this);
         vc_play.setOnSeekChangeListener(this);
+
+        // 当有保存的进度时，继续播放
+        if(savedInstanceState != null) {
+            vc_play.enableController();
+            playVideo(savedInstanceState.getString("source"));
+            mv_content.seekTo(savedInstanceState.getInt("progress"));
+        }
+
     }
 
     @Override
@@ -99,5 +109,13 @@ public class Player extends AppCompatActivity implements
     @Override
     public void onStopSeek() {
         mHandler.postDelayed(mHide, MovieView.HIDE_TIME);
+    }
+
+    // 重新加载时保留进度
+    @Override
+    protected void onSaveInstanceState(@NonNull @NotNull Bundle outState) {
+        outState.putInt("progress", mv_content.getCurrentPosition());
+        outState.putString("source", mv_content.getVideoPath());
+        super.onSaveInstanceState(outState);
     }
 }
