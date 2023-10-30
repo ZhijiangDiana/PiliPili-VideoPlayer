@@ -62,9 +62,11 @@ public class Player extends AppCompatActivity implements
         int like = bundle.getInt("like");
         int dispatchCount = bundle.getInt("dispatchCount");
 
+        // setText方法必须传入String类型，否则会抛出找不到控件的异常
         ((TextView)findViewById(R.id.videoId)).setText(String.valueOf(id));
         ((TextView)findViewById(R.id.videoName)).setText(videoName);
 //        ((TextView)findViewById(R.id.videoTag)).setText(videoTag);
+        ((TextView)findViewById(R.id.playCnt)).setText(String.valueOf(playCount));
         ((TextView)findViewById(R.id.videoDes)).setText(videoDescription);
         ((TextView)findViewById(R.id.uploadDate)).setText(uploadDate);
         play("http://1.15.179.230:8081/" + videoName + "_480p.mp4");
