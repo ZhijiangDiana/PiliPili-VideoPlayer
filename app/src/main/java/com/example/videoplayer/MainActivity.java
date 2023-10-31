@@ -76,15 +76,6 @@ public class MainActivity extends AppCompatActivity {
 
         // 初始化适配器
         mPreviewAdapter = new VideoPreviewAdapter(mPreviewList);
-
-        // 给适配器设置监听器
-        mPreviewAdapter.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-            }
-        });
-
         // 设置适配器
         mRecyclerView.setAdapter(mPreviewAdapter);
     }

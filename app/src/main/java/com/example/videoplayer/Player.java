@@ -1,12 +1,17 @@
 package com.example.videoplayer;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -14,7 +19,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import org.jetbrains.annotations.NotNull;
+import utils.DisplayUtils;
 import utils.ViewUtils;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Player extends AppCompatActivity implements
         View.OnClickListener, VideoController.OnSeekChangeListener {
@@ -27,6 +36,13 @@ public class Player extends AppCompatActivity implements
     private Handler mHandler = new Handler();
     private ScrollView videoInfo;
     private RelativeLayout player;
+    public static Player playerActivity;
+    private boolean isFullScreen = false;
+    private ImageView fullscreen;
+    public Player() {
+        playerActivity = Player.this;
+    }
+    Bitmap thumb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +57,7 @@ public class Player extends AppCompatActivity implements
         vc_play.setOnSeekChangeListener(this);
         videoInfo = findViewById(R.id.videoInfo);
         player = findViewById(R.id.player);
+        fullscreen = findViewById(R.id.fullscreen);
 
         // 当有保存的进度时，继续播放
         if(savedInstanceState != null) {
@@ -56,22 +73,28 @@ public class Player extends AppCompatActivity implements
         String videoName = bundle.getString("videoName");
         String videoTag = bundle.getString("videoTag");
         String videoDescription = bundle.getString("videoDescription");
-        byte[] videoThumb = bundle.getByteArray("videoThumb");
+        byte[] videoThumb = bundle.getByteArray("thumbByte");
         String uploadDate = bundle.getString("uploadDate");
         int playCount = bundle.getInt("playCount");
         int like = bundle.getInt("like");
         int dispatchCount = bundle.getInt("dispatchCount");
 
         // setText方法必须传入String类型，否则会抛出找不到控件的异常
+        ((TextView)findViewById(R.id.tv_open)).setText(videoName);
         ((TextView)findViewById(R.id.videoId)).setText(String.valueOf(id));
         ((TextView)findViewById(R.id.videoName)).setText(videoName);
 //        ((TextView)findViewById(R.id.videoTag)).setText(videoTag);
         ((TextView)findViewById(R.id.playCnt)).setText(String.valueOf(playCount));
         ((TextView)findViewById(R.id.videoDes)).setText(videoDescription);
         ((TextView)findViewById(R.id.uploadDate)).setText(uploadDate);
-        play("http://1.15.179.230:8081/" + videoName + "_480p.mp4");
+        play("http://1.15.179.230:8081/vod/" + videoName + "_1080p.mp4" + "/index.m3u8");
 
-
+        // 根据视频缩略图制定全屏规则
+        thumb = BitmapFactory.decodeByteArray(videoThumb, 0, videoThumb.length, new BitmapFactory.Options());
+        if(thumb.getWidth() <= thumb.getHeight()) { // 竖屏视频锁定竖屏
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        } else // 横屏视频不限制
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
     }
 
     @Override
@@ -154,7 +177,7 @@ public class Player extends AppCompatActivity implements
         super.onSaveInstanceState(outState);
     }
 
-    RelativeLayout.LayoutParams landscapeParam = new RelativeLayout.LayoutParams(
+    RelativeLayout.LayoutParams fullScreenParam = new RelativeLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
     RelativeLayout.LayoutParams portraitParam = new RelativeLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewUtils.dp2px(MainActivity.mainActivity, 250));
@@ -162,12 +185,60 @@ public class Player extends AppCompatActivity implements
     public void onConfigurationChanged(@NonNull @NotNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            player.setLayoutParams(portraitParam);
-            videoInfo.setVisibility(View.VISIBLE);
+            tv_open.setWidth(DisplayUtils.dip2px(playerActivity, 200));
+            if (thumb.getWidth() > thumb.getHeight()) {
+                videoInfo.setVisibility(View.VISIBLE);
+                player.setLayoutParams(portraitParam);
+                fullscreen.setImageResource(R.drawable.fullscreen_24);
+                isFullScreen = false;
+            }
         }
         else if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            player.setLayoutParams(landscapeParam);
+            if(thumb.getWidth() > thumb.getHeight()) {
+                tv_open.setWidth(DisplayUtils.dip2px(playerActivity, 800));
+                player.setLayoutParams(fullScreenParam);
+                videoInfo.setVisibility(View.GONE);
+                fullscreen.setImageResource(R.drawable.baseline_fullscreen_exit_24);
+                isFullScreen = true;
+            }
+        }
+    }
+
+    public void fullScreen(View view) {
+        if (isFullScreen) { // 退出全屏
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
+            player.setLayoutParams(portraitParam);
+            videoInfo.setVisibility(View.VISIBLE);
+            fullscreen.setImageResource(R.drawable.fullscreen_24);
+            isFullScreen = false;
+            if (thumb.getWidth() > thumb.getHeight()) {
+                TimerTask unlockSensor = new TimerTask() {
+                    @Override
+                    public void run() {
+                        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+                    }
+                };
+                new Timer().schedule(unlockSensor, 5000);
+            }
+        } else { // 进入全屏
+            if (thumb.getWidth() > thumb.getHeight()) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
+                TimerTask unlockSensor = new TimerTask() {
+                    @Override
+                    public void run() {
+                        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+                    }
+                };
+                new Timer().schedule(unlockSensor, 5000);
+            }
+            else
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            player.setLayoutParams(fullScreenParam);
             videoInfo.setVisibility(View.GONE);
+            fullscreen.setImageResource(R.drawable.baseline_fullscreen_exit_24);
+            isFullScreen = true;
         }
     }
 }
