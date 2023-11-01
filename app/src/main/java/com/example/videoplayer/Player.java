@@ -11,10 +11,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.ScrollView;
-import android.widget.TextView;
+import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
@@ -42,7 +39,11 @@ public class Player extends AppCompatActivity implements
     public Player() {
         playerActivity = Player.this;
     }
-    Bitmap thumb;
+    private Bitmap thumb;
+    private View qualityPopupView;
+    private PopupWindow qualityPopupWindow;
+    private ImageView quality;
+    private String videoPath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +59,13 @@ public class Player extends AppCompatActivity implements
         videoInfo = findViewById(R.id.videoInfo);
         player = findViewById(R.id.player);
         fullscreen = findViewById(R.id.fullscreen);
+        quality = findViewById(R.id.quality);
+        qualityPopupView = getLayoutInflater().inflate(R.layout.quality_popup, null);
+        qualityPopupWindow = new PopupWindow(qualityPopupView,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                true);
+
 
         // 当有保存的进度时，继续播放
         if(savedInstanceState != null) {
@@ -78,6 +86,7 @@ public class Player extends AppCompatActivity implements
         int playCount = bundle.getInt("playCount");
         int like = bundle.getInt("like");
         int dispatchCount = bundle.getInt("dispatchCount");
+        videoPath = "http://1.15.179.230:8081/vod/" + videoName + "_1080p.mp4" + "/index.m3u8";
 
         // setText方法必须传入String类型，否则会抛出找不到控件的异常
         ((TextView)findViewById(R.id.tv_open)).setText(videoName);
@@ -87,7 +96,7 @@ public class Player extends AppCompatActivity implements
         ((TextView)findViewById(R.id.playCnt)).setText(String.valueOf(playCount));
         ((TextView)findViewById(R.id.videoDes)).setText(videoDescription);
         ((TextView)findViewById(R.id.uploadDate)).setText(uploadDate);
-        play("http://1.15.179.230:8081/vod/" + videoName + "_1080p.mp4" + "/index.m3u8");
+        play(videoPath);
 
         // 根据视频缩略图制定全屏规则
         thumb = BitmapFactory.decodeByteArray(videoThumb, 0, videoThumb.length, new BitmapFactory.Options());
@@ -240,5 +249,29 @@ public class Player extends AppCompatActivity implements
             fullscreen.setImageResource(R.drawable.baseline_fullscreen_exit_24);
             isFullScreen = true;
         }
+    }
+
+    public void quality(View view) {
+        qualityPopupWindow.showAsDropDown(quality);
+    }
+
+    public void switchLowQuality(View view) {
+        if (videoPath == null)
+            return;
+        if (videoPath.contains("_480p.mp4"))
+            return;
+        videoPath = videoPath.replaceAll("_1080p.mp4", "_480p.mp4");
+        play(videoPath);
+        Toast.makeText(playerActivity, videoPath, Toast.LENGTH_SHORT);
+    }
+
+    public void switchHighQuality(View view) {
+        if (videoPath == null)
+            return;
+        if (videoPath.contains("_1080p.mp4"))
+            return;
+        videoPath = videoPath.replaceAll("_480p.mp4", "_1080p.mp4");
+        play(videoPath);
+        Toast.makeText(playerActivity, videoPath, Toast.LENGTH_SHORT);
     }
 }

@@ -4,4 +4,5 @@
     <color name="white">#FFFFFFFF</color>
     <color name="pink">#FFFB7299</color>
     <color name="purple">#FF673AB7</color>
+    <color name="dock_black">#99000000</color>
 </resources>
