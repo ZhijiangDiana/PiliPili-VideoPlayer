@@ -11,17 +11,24 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import org.jetbrains.annotations.NotNull;
 
+import java.sql.SQLException;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import static com.example.videoplayer.MainActivity.*;
 
 public class VideoPreviewAdapter extends RecyclerView.Adapter<VideoPreviewAdapter.mHolder> {
-    private List<previewBean> mPreviewBeans;
+    public List<previewBean> mPreviewBeans;
 
     public VideoPreviewAdapter(List<previewBean> list) {
         this.mPreviewBeans = list;
@@ -114,4 +121,57 @@ public class VideoPreviewAdapter extends RecyclerView.Adapter<VideoPreviewAdapte
     public void setOnItemClickListener(AdapterView.OnItemClickListener listener) {
         this.mOnItemClickListener = listener;
     }
+
+    boolean isRefreshing = false;
+    public RecyclerView.OnScrollListener scrollToLastListener = new RecyclerView.OnScrollListener() {
+        @Override
+        public void onScrolled(@NonNull @NotNull RecyclerView recyclerView, int dx, int dy) {
+            super.onScrolled(recyclerView, dx, dy);
+
+            LinearLayoutManager lm = (LinearLayoutManager) recyclerView.getLayoutManager();
+            int lastVisiblePosition = lm.findLastVisibleItemPosition();
+            int totalCnt = lm.getItemCount();
+
+            if (lastVisiblePosition == totalCnt-1 && !isRefreshing) {
+                if (totalCnt > 0) {
+                    isRefreshing = true;
+
+                    // 添加数据，一次添加三个
+                    try {
+                        for(int i=0;i<3;i++) {
+                            if (!rs.next()) {
+                                Toast.makeText(mainActivity, "已经加载到底了", Toast.LENGTH_SHORT);
+                                return;
+                            }
+                            int id = rs.getInt("id");
+                            String videoName = rs.getString("videoName");
+                            String videoTag = rs.getString("videoTag");
+                            String videoDescription = rs.getString("videoDescription").replace("\\n", "\n");
+                            String uploadDate = rs.getString("uploadDate");
+                            byte[] videoThumb = rs.getBytes("videoThumb");
+                            int playCount = rs.getInt("playCount");
+                            int like = rs.getInt("like");
+                            int dispatchCount = rs.getInt("dispatchCount");
+
+                            previewBean pBean = new previewBean(id, videoName, videoTag, videoDescription, videoThumb,
+                                    uploadDate, playCount, like, dispatchCount);
+                            mPreviewBeans.add(pBean);
+                            mPreviewAdapter.notifyDataSetChanged();
+                        }
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+
+
+                    TimerTask delay = new TimerTask() {
+                        @Override
+                        public void run() {
+                            isRefreshing = false;
+                        }
+                    };
+                    new Timer().schedule(delay, 1000);
+                }
+            }
+        }
+    };
 }

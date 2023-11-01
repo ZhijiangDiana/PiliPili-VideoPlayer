@@ -114,13 +114,13 @@
                     android:layout_marginStart="10dp"
                     android:textSize="15sp"
                     android:text="播放 "
-                    android:textColor="#FF8E8E8E"/>
+                    android:textColor="@color/grey"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/playCnt"
                     android:textSize="15sp"
-                    android:textColor="#FF8E8E8E"
+                    android:textColor="@color/grey"
                     android:text="114514"/>
                 <TextView
                     android:layout_width="wrap_content"
@@ -128,13 +128,13 @@
                     android:layout_marginStart="10dp"
                     android:textSize="15sp"
                     android:text="发布时间 "
-                    android:textColor="#FF8E8E8E"/>
+                    android:textColor="@color/grey"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/uploadDate"
                     android:textSize="15sp"
-                    android:textColor="#FF8E8E8E"
+                    android:textColor="@color/grey"
                     android:text="1919年8月10日 11:45:14"/>
             </LinearLayout>
             <LinearLayout
@@ -148,13 +148,13 @@
                     android:layout_marginStart="10dp"
                     android:textSize="15sp"
                     android:text="编号 av"
-                    android:textColor="#FF8E8E8E"/>
+                    android:textColor="@color/grey"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/videoId"
                     android:textSize="15sp"
-                    android:textColor="#FF8E8E8E"
+                    android:textColor="@color/grey"
                     android:text="114514"/>
             </LinearLayout>
 
@@ -167,7 +167,7 @@
                 android:layout_below="@+id/videoUplInfo2"
                 android:layout_marginTop="5dp"
                 android:layout_marginStart="10dp"
-                android:textColor="#FF8E8E8E"/>
+                android:textColor="@color/grey"/>
 
 
             <androidx.constraintlayout.helper.widget.Flow
