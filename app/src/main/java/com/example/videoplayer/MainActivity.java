@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
         mainActivity = MainActivity.this;
     }
 
-    private RecyclerView mRecyclerView;
+    public static RecyclerView mRecyclerView;
     public static VideoPreviewAdapter mPreviewAdapter;
     private List<previewBean> mPreviewList = new ArrayList<>(114);
 

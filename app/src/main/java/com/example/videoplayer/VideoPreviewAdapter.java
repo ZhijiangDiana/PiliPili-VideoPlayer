@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -156,7 +157,14 @@ public class VideoPreviewAdapter extends RecyclerView.Adapter<VideoPreviewAdapte
                             previewBean pBean = new previewBean(id, videoName, videoTag, videoDescription, videoThumb,
                                     uploadDate, playCount, like, dispatchCount);
                             mPreviewBeans.add(pBean);
-                            mPreviewAdapter.notifyDataSetChanged();
+
+                            // 刷新adapter数据时要确保RecyclerView不在ComputingLayout
+                            new Handler().post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mPreviewAdapter.notifyDataSetChanged();
+                                }
+                            });
                         }
                     } catch (SQLException e) {
                         throw new RuntimeException(e);
