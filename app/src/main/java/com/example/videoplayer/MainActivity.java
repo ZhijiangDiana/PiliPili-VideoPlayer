@@ -58,18 +58,7 @@ public class MainActivity extends AppCompatActivity {
             for(int i=0;i<3;i++) {
                 if (!rs.next())
                     return;
-                int id = rs.getInt("id");
-                String videoName = rs.getString("videoName");
-                String videoTag = rs.getString("videoTag");
-                String videoDescription = rs.getString("videoDescription").replace("\\n", "\n");
-                String uploadDate = rs.getString("uploadDate");
-                byte[] videoThumb = rs.getBytes("videoThumb");
-                int playCount = rs.getInt("playCount");
-                int like = rs.getInt("like");
-                int dispatchCount = rs.getInt("dispatchCount");
-
-                previewBean pBean = new previewBean(id, videoName, videoTag, videoDescription, videoThumb,
-                        uploadDate, playCount, like, dispatchCount);
+                previewBean pBean = getThreeBeans();
                 mPreviewList.add(pBean);
             }
         } catch (SQLException e) {
@@ -81,55 +70,32 @@ public class MainActivity extends AppCompatActivity {
         // 设置适配器
         mRecyclerView.setAdapter(mPreviewAdapter);
     }
-    public void playVideo(View view) {
-        //跳转到Player完成播放视频
-        Intent openPlayer = new Intent(this, Player.class);
-        Bundle bundle = new Bundle();
+
+    public static previewBean getThreeBeans() throws SQLException {
+        int id = rs.getInt("id");
+        String videoName = rs.getString("videoName");
+        String videoTag = rs.getString("videoTag");
+        String videoDescription = rs.getString("videoDescription").replace("\\n", "\n");
+        String uploadDate = rs.getString("uploadDate");
+        byte[] videoThumb = rs.getBytes("videoThumb");
+        int playCount = rs.getInt("playCount");
+        int like = rs.getInt("like");
+        int dispatchCount = rs.getInt("dispatchCount");
+
+        previewBean pBean = new previewBean(id, videoName, videoTag, videoDescription, videoThumb,
+                uploadDate, playCount, like, dispatchCount);
+        return pBean;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
         try {
-            //todo 仅供测试使用，正常情况是从listview里获取
-            conn = DriverManager.getConnection("jdbc:mysql://1.15.179.230:3306/VideoPlayer?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC", "root", "114514");
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery("SELECT * FROM VideoDB WHERE id=3");
-            rs.next();
-
-            int id = rs.getInt("id");
-            bundle.putInt("id", id);
-
-            String videoName = rs.getString("videoName");
-            bundle.putString("videoName", videoName);
-
-            String videoTag = rs.getString("videoTag");
-            bundle.putString("videoTag", videoTag);
-
-            String videoDescription = rs.getString("videoDescription").replace("\\n", "\n");
-            bundle.putString("videoDescription", videoDescription);
-
-            String uploadDate = rs.getString("uploadDate");
-            bundle.putString("uploadDate", uploadDate);
-
-            byte[] videoThumb = rs.getBytes("videoThumb");
-            bundle.putByteArray("thumbByte", videoThumb);
-
-            int playCount = rs.getInt("playCount");
-            bundle.putInt("playCount", playCount);
-
-            int like = rs.getInt("like");
-            bundle.putInt("like", like);
-
-            int dispatchCount = rs.getInt("dispatchCount");
-            bundle.putInt("dispatchCount", dispatchCount);
+            conn.close();
+            stmt.close();
+            rs.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            try {
-                conn.close();
-                stmt.close();
-                rs.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            e.printStackTrace();
         }
-        openPlayer.putExtras(bundle);
-        startActivity(openPlayer);
     }
 }

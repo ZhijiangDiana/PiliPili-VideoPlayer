@@ -16,9 +16,6 @@
         android:theme="@style/Theme.VideoPlayer"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
-        <activity
-            android:name=".VideoViewTest"
-            android:exported="false"/>
         <!-- android4.0之后刷新豁免需要加上screenSize -->
         <activity
             android:name=".Player"

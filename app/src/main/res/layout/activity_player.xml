@@ -36,7 +36,7 @@
                 android:src="@drawable/baseline_speed_24"/>
 
 
-            <TextView
+            <com.example.videoplayer.MarqueeTextView
                 android:id="@+id/tv_open"
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
@@ -101,6 +101,7 @@
                 android:textSize="20sp"
                 android:layout_marginTop="20dp"
                 android:layout_marginStart="15dp"
+                android:layout_marginEnd="10dp"
                 android:textColor="@color/black"/>
             <LinearLayout
                 android:layout_width="match_parent"
@@ -167,23 +168,81 @@
                 android:layout_below="@+id/videoUplInfo2"
                 android:layout_marginTop="5dp"
                 android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
                 android:textColor="@color/grey"/>
 
+            <layout.FlowLayout
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:id="@+id/videoTags"
+                android:layout_below="@id/videoDes"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"/>
 
-            <androidx.constraintlayout.helper.widget.Flow
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/videoDes"
-                android:id="@+id/videoTag"
-                app:layout_constraintTop_toTopOf="parent"
-                app:flow_horizontalGap="10dp"
-                app:flow_verticalGap="10dp"
-                app:flow_wrapMode="none"
-                app:constraint_referenced_ids="" />
+                android:orientation="horizontal"
+                android:layout_below="@id/videoTags"
+                android:layout_centerHorizontal="true">
 
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
+                    <Button
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:background="@drawable/baseline_thumb_up_24"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/likeCnt"
+                        android:text="114514"
+                        android:textColor="@color/grey"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="40dp">
+
+                    <Button
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:background="@drawable/baseline_star_24"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="40dp">
+
+                    <Button
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:background="@drawable/baseline_share_24"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/shareCnt"
+                        android:text="114514"
+                        android:textColor="@color/grey"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
 
         </RelativeLayout>
+
+
     </ScrollView>
 
 </RelativeLayout>

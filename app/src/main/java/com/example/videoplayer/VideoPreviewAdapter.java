@@ -118,11 +118,6 @@ public class VideoPreviewAdapter extends RecyclerView.Adapter<VideoPreviewAdapte
         return position;
     }
 
-    private AdapterView.OnItemClickListener mOnItemClickListener;
-    public void setOnItemClickListener(AdapterView.OnItemClickListener listener) {
-        this.mOnItemClickListener = listener;
-    }
-
     boolean isRefreshing = false;
     public RecyclerView.OnScrollListener scrollToLastListener = new RecyclerView.OnScrollListener() {
         @Override
@@ -144,18 +139,7 @@ public class VideoPreviewAdapter extends RecyclerView.Adapter<VideoPreviewAdapte
                                 Toast.makeText(mainActivity, "已经加载到底了", Toast.LENGTH_SHORT);
                                 return;
                             }
-                            int id = rs.getInt("id");
-                            String videoName = rs.getString("videoName");
-                            String videoTag = rs.getString("videoTag");
-                            String videoDescription = rs.getString("videoDescription").replace("\\n", "\n");
-                            String uploadDate = rs.getString("uploadDate");
-                            byte[] videoThumb = rs.getBytes("videoThumb");
-                            int playCount = rs.getInt("playCount");
-                            int like = rs.getInt("like");
-                            int dispatchCount = rs.getInt("dispatchCount");
-
-                            previewBean pBean = new previewBean(id, videoName, videoTag, videoDescription, videoThumb,
-                                    uploadDate, playCount, like, dispatchCount);
+                            previewBean pBean = MainActivity.getThreeBeans();
                             mPreviewBeans.add(pBean);
 
                             // 刷新adapter数据时要确保RecyclerView不在ComputingLayout

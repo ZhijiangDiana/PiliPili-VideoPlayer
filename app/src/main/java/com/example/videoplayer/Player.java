@@ -1,10 +1,12 @@
 package com.example.videoplayer;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.media.Image;
 import android.media.MediaPlayer;
 import android.os.Handler;
@@ -15,19 +17,21 @@ import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import androidx.constraintlayout.helper.widget.Flow;
+import androidx.core.view.ViewCompat;
+import layout.FlowLayout;
 import org.jetbrains.annotations.NotNull;
 import utils.DisplayUtils;
 import utils.ViewUtils;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 public class Player extends AppCompatActivity implements
         View.OnClickListener, VideoController.OnSeekChangeListener {
 
     private static final String TAG = "MoviePlayerActivity";
     private MovieView mv_content;
-    private TextView tv_open;
+    private MarqueeTextView tv_open;
     private RelativeLayout rl_top;
     private VideoController vc_play;
     private Handler mHandler = new Handler();
@@ -44,7 +48,9 @@ public class Player extends AppCompatActivity implements
     private PopupWindow qualityPopupWindow;
     private ImageView quality;
     private String videoPath;
+    private String serverIP = "121.41.1.13:8081"; // 1.15.179.230:8081
 
+    @SuppressLint("ResourceAsColor")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,16 +92,28 @@ public class Player extends AppCompatActivity implements
         int playCount = bundle.getInt("playCount");
         int like = bundle.getInt("like");
         int dispatchCount = bundle.getInt("dispatchCount");
-        videoPath = "http://1.15.179.230:8081/vod/" + videoName + "_1080p.mp4" + "/index.m3u8";
+        videoPath = "http://" + serverIP + "/vod/" + videoName + "_1080p.mp4" + "/index.m3u8";
 
         // setText方法必须传入String类型，否则会抛出找不到控件的异常
         ((TextView)findViewById(R.id.tv_open)).setText(videoName);
         ((TextView)findViewById(R.id.videoId)).setText(String.valueOf(id));
         ((TextView)findViewById(R.id.videoName)).setText(videoName);
-//        ((TextView)findViewById(R.id.videoTag)).setText(videoTag);
+        FlowLayout tagView = findViewById(R.id.videoTags);
         ((TextView)findViewById(R.id.playCnt)).setText(String.valueOf(playCount));
         ((TextView)findViewById(R.id.videoDes)).setText(videoDescription);
         ((TextView)findViewById(R.id.uploadDate)).setText(uploadDate);
+
+
+        List<String> list = Arrays.asList(videoTag.split("&&"));
+        tagView.setAlignByCenter(FlowLayout.AlienState.LEFT);
+        tagView.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        tagView.setAdapter(list, R.layout.tag, new FlowLayout.ItemView<String>() {
+            @Override
+            public void getCover(String item, FlowLayout.ViewHolder holder, View inflate, int position) {
+                holder.setText(R.id.tv_label_name,item);
+            }
+        });
+
         play(videoPath);
 
         // 根据视频缩略图制定全屏规则
@@ -140,7 +158,7 @@ public class Player extends AppCompatActivity implements
     private Runnable mHide = new Runnable() {
         @Override
         public void run() {
-//            mv_content.showOrHide();
+            mv_content.hide();
         }
     };
 
@@ -194,7 +212,7 @@ public class Player extends AppCompatActivity implements
     public void onConfigurationChanged(@NonNull @NotNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            tv_open.setWidth(DisplayUtils.dip2px(playerActivity, 200));
+            tv_open.getLayoutParams().width = DisplayUtils.dip2px(playerActivity, 200);
             if (thumb.getWidth() > thumb.getHeight()) {
                 videoInfo.setVisibility(View.VISIBLE);
                 player.setLayoutParams(portraitParam);
@@ -204,7 +222,7 @@ public class Player extends AppCompatActivity implements
         }
         else if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             if(thumb.getWidth() > thumb.getHeight()) {
-                tv_open.setWidth(DisplayUtils.dip2px(playerActivity, 800));
+                tv_open.getLayoutParams().width = DisplayUtils.dip2px(playerActivity, 800);
                 player.setLayoutParams(fullScreenParam);
                 videoInfo.setVisibility(View.GONE);
                 fullscreen.setImageResource(R.drawable.baseline_fullscreen_exit_24);
