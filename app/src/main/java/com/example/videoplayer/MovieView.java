@@ -116,10 +116,15 @@ public class MovieView extends VideoView implements View.OnTouchListener, View.O
         }
     }
 
+    public void hide() {
+        mTopView.setVisibility(View.GONE);
+        mBottomView.setVisibility(View.GONE);
+    }
+
     private Runnable mHide = new Runnable() {
         @Override
         public void run() {
-            showOrHide();
+            hide();
         }
     };
 

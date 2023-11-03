@@ -1,13 +1,13 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.VideoPlayer" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Base.Theme.VideoPlayer" parent="Theme.MaterialComponents.DayNight.NoActionBar.Bridge">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
 
     <style name="Theme.VideoPlayer" parent="Base.Theme.VideoPlayer"/>
 
-    <style name="FullScreen" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="FullScreen" parent="Theme.MaterialComponents.DayNight.NoActionBar.Bridge">
         <item name="android:windowFullscreen">true</item>
         <item name="windowNoTitle">true</item>
         <item name="android:windowContentOverlay">@null</item>

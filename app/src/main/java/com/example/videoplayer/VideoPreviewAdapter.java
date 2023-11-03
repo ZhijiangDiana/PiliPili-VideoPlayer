@@ -5,23 +5,31 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import org.jetbrains.annotations.NotNull;
 
+import java.sql.SQLException;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import static com.example.videoplayer.MainActivity.*;
 
 public class VideoPreviewAdapter extends RecyclerView.Adapter<VideoPreviewAdapter.mHolder> {
-    private List<previewBean> mPreviewBeans;
+    public List<previewBean> mPreviewBeans;
 
     public VideoPreviewAdapter(List<previewBean> list) {
         this.mPreviewBeans = list;
@@ -110,8 +118,52 @@ public class VideoPreviewAdapter extends RecyclerView.Adapter<VideoPreviewAdapte
         return position;
     }
 
-    private AdapterView.OnItemClickListener mOnItemClickListener;
-    public void setOnItemClickListener(AdapterView.OnItemClickListener listener) {
-        this.mOnItemClickListener = listener;
-    }
+    boolean isRefreshing = false;
+    public RecyclerView.OnScrollListener scrollToLastListener = new RecyclerView.OnScrollListener() {
+        @Override
+        public void onScrolled(@NonNull @NotNull RecyclerView recyclerView, int dx, int dy) {
+            super.onScrolled(recyclerView, dx, dy);
+
+            LinearLayoutManager lm = (LinearLayoutManager) recyclerView.getLayoutManager();
+            int lastVisiblePosition = lm.findLastVisibleItemPosition();
+            int totalCnt = lm.getItemCount();
+
+            if (lastVisiblePosition == totalCnt-1 && !isRefreshing) {
+                if (totalCnt > 0) {
+                    isRefreshing = true;
+
+                    // 添加数据，一次添加三个
+                    try {
+                        for(int i=0;i<3;i++) {
+                            if (!rs.next()) {
+                                Toast.makeText(mainActivity, "已经加载到底了", Toast.LENGTH_SHORT);
+                                return;
+                            }
+                            previewBean pBean = MainActivity.getThreeBeans();
+                            mPreviewBeans.add(pBean);
+
+                            // 刷新adapter数据时要确保RecyclerView不在ComputingLayout
+                            new Handler().post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mPreviewAdapter.notifyDataSetChanged();
+                                }
+                            });
+                        }
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+
+
+                    TimerTask delay = new TimerTask() {
+                        @Override
+                        public void run() {
+                            isRefreshing = false;
+                        }
+                    };
+                    new Timer().schedule(delay, 1000);
+                }
+            }
+        }
+    };
 }

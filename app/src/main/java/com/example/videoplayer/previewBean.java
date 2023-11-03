@@ -1,5 +1,7 @@
 package com.example.videoplayer;
 
+import android.widget.MediaController;
+
 public class previewBean {
     private int id;
     private String videoName;
