@@ -26,6 +26,8 @@ import utils.ViewUtils;
 
 import java.util.*;
 
+import static com.example.videoplayer.Variable.*;
+
 public class Player extends AppCompatActivity implements
         View.OnClickListener, VideoController.OnSeekChangeListener {
 
@@ -48,7 +50,6 @@ public class Player extends AppCompatActivity implements
     private PopupWindow qualityPopupWindow;
     private ImageView quality;
     private String videoPath;
-    private String serverIP = "121.41.1.13:8081"; // 1.15.179.230:8081
 
     @SuppressLint("ResourceAsColor")
     @Override
@@ -92,7 +93,7 @@ public class Player extends AppCompatActivity implements
         int playCount = bundle.getInt("playCount");
         int like = bundle.getInt("like");
         int dispatchCount = bundle.getInt("dispatchCount");
-        videoPath = "http://" + serverIP + "/vod/" + videoName + "_1080p.mp4" + "/index.m3u8";
+        videoPath = "http://" + videoServSocket + "/vod/" + videoName + "_1080p.mp4" + "/index.m3u8";
 
         // setText方法必须传入String类型，否则会抛出找不到控件的异常
         ((TextView)findViewById(R.id.tv_open)).setText(videoName);

@@ -1,6 +1,5 @@
 package com.example.videoplayer;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,12 +8,10 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -29,9 +26,9 @@ import java.util.TimerTask;
 import static com.example.videoplayer.MainActivity.*;
 
 public class VideoPreviewAdapter extends RecyclerView.Adapter<VideoPreviewAdapter.mHolder> {
-    public List<previewBean> mPreviewBeans;
+    public List<PreviewBean> mPreviewBeans;
 
-    public VideoPreviewAdapter(List<previewBean> list) {
+    public VideoPreviewAdapter(List<PreviewBean> list) {
         this.mPreviewBeans = list;
     }
 
@@ -45,7 +42,7 @@ public class VideoPreviewAdapter extends RecyclerView.Adapter<VideoPreviewAdapte
             @Override
             public void onClick(View v) {
                 int position = mHolder.getAdapterPosition();
-                previewBean pBean = mPreviewBeans.get(position);
+                PreviewBean pBean = mPreviewBeans.get(position);
                 //跳转到Player完成播放视频
                 Intent openPlayer = new Intent(MainActivity.mainActivity, Player.class);
                 Bundle bundle = new Bundle();
@@ -80,7 +77,7 @@ public class VideoPreviewAdapter extends RecyclerView.Adapter<VideoPreviewAdapte
     @Override
     public void onBindViewHolder(@NonNull @NotNull mHolder holder, int position) {
         // 绑定数据
-        previewBean pBean = mPreviewBeans.get(position);
+        PreviewBean pBean = mPreviewBeans.get(position);
 
         // 设置数据
         byte[] thumbByte = pBean.getVideoThumb();
@@ -139,7 +136,7 @@ public class VideoPreviewAdapter extends RecyclerView.Adapter<VideoPreviewAdapte
                                 Toast.makeText(mainActivity, "已经加载到底了", Toast.LENGTH_SHORT);
                                 return;
                             }
-                            previewBean pBean = MainActivity.getThreeBeans();
+                            PreviewBean pBean = MainActivity.getThreeBeans();
                             mPreviewBeans.add(pBean);
 
                             // 刷新adapter数据时要确保RecyclerView不在ComputingLayout

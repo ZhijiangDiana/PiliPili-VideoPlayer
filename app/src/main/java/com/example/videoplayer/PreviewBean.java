@@ -1,8 +1,6 @@
 package com.example.videoplayer;
 
-import android.widget.MediaController;
-
-public class previewBean {
+public class PreviewBean {
     private int id;
     private String videoName;
     private String videoTag;
@@ -13,7 +11,7 @@ public class previewBean {
     private int like;
     private int dispatchCount;
 
-    public previewBean(int id, String videoName, String videoTag, String videoDescription, byte[] videoThumb, String uploadDate, int playCount, int like, int dispatchCount) {
+    public PreviewBean(int id, String videoName, String videoTag, String videoDescription, byte[] videoThumb, String uploadDate, int playCount, int like, int dispatchCount) {
         this.id = id;
         this.videoName = videoName;
         this.videoTag = videoTag;
