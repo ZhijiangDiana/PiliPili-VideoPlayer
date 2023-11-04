@@ -191,17 +191,22 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal"
+                    android:id="@+id/player_likeLay">
 
                     <Button
                         android:layout_width="50dp"
                         android:layout_height="50dp"
-                        android:background="@drawable/baseline_thumb_up_24"/>
+                        android:id="@+id/player_likeButton"
+                        android:background="@drawable/baseline_thumb_up_24"
+                        android:onClick="modifyVideoData"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/likeCnt"
-                        android:text="114514"
+                        android:text="114"
+
                         android:textColor="@color/grey"/>
 
                 </LinearLayout>
@@ -210,11 +215,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_marginStart="40dp">
+                    android:layout_marginStart="40dp"
+                    android:id="@+id/player_saveLay"
+                    android:onClick="modifyVideoData">
 
                     <Button
                         android:layout_width="50dp"
                         android:layout_height="50dp"
+                        android:id="@+id/player_saveButton"
                         android:background="@drawable/baseline_star_24"/>
 
                 </LinearLayout>
@@ -223,17 +231,21 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_marginStart="40dp">
+                    android:layout_marginStart="40dp"
+                    android:gravity="center_horizontal"
+                    android:id="@+id/player_shareLay">
 
                     <Button
                         android:layout_width="50dp"
                         android:layout_height="50dp"
-                        android:background="@drawable/baseline_share_24"/>
+                        android:id="@+id/player_shareButton"
+                        android:background="@drawable/baseline_share_24"
+                        android:onClick="modifyVideoData"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/shareCnt"
-                        android:text="114514"
+                        android:text="114"
                         android:textColor="@color/grey"/>
 
                 </LinearLayout>

@@ -6,8 +6,6 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.media.Image;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.util.Log;
@@ -17,13 +15,13 @@ import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import androidx.constraintlayout.helper.widget.Flow;
-import androidx.core.view.ViewCompat;
 import layout.FlowLayout;
+import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 import utils.DisplayUtils;
 import utils.ViewUtils;
 
+import java.io.IOException;
 import java.util.*;
 
 import static com.example.videoplayer.Variable.*;
@@ -50,6 +48,11 @@ public class Player extends AppCompatActivity implements
     private PopupWindow qualityPopupWindow;
     private ImageView quality;
     private String videoPath;
+    private TextView likeCnt;
+    private Button likeButton;
+    private TextView shareCnt;
+    OkHttpClient okp;
+    int videoID;
 
     @SuppressLint("ResourceAsColor")
     @Override
@@ -67,11 +70,18 @@ public class Player extends AppCompatActivity implements
         player = findViewById(R.id.player);
         fullscreen = findViewById(R.id.fullscreen);
         quality = findViewById(R.id.quality);
+        likeCnt = findViewById(R.id.likeCnt);
+        shareCnt = findViewById(R.id.shareCnt);
+        likeButton = findViewById(R.id.player_likeButton);
+
+
         qualityPopupView = getLayoutInflater().inflate(R.layout.quality_popup, null);
         qualityPopupWindow = new PopupWindow(qualityPopupView,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 true);
+
+        okp = new OkHttpClient().newBuilder().build();
 
 
         // 当有保存的进度时，继续播放
@@ -84,26 +94,55 @@ public class Player extends AppCompatActivity implements
         // 接收MainActivity传送的Bundle
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
-        int id = bundle.getInt("id");
+        videoID = bundle.getInt("id");
         String videoName = bundle.getString("videoName");
         String videoTag = bundle.getString("videoTag");
         String videoDescription = bundle.getString("videoDescription");
         byte[] videoThumb = bundle.getByteArray("thumbByte");
         String uploadDate = bundle.getString("uploadDate");
-        int playCount = bundle.getInt("playCount");
+        int playCount = bundle.getInt("playCount") + 1;
         int like = bundle.getInt("like");
         int dispatchCount = bundle.getInt("dispatchCount");
         videoPath = "http://" + videoServSocket + "/vod/" + videoName + "_1080p.mp4" + "/index.m3u8";
 
+        FormBody body = new FormBody.Builder()
+                .add("videoID", String.valueOf(videoID))
+                .add("videoParam", "playCount")
+                .build();
+
+        okp.newCall(new Request.Builder()
+                .post(body)
+                .url("http://" +mainServSocket+ "/" +war+ "/" + "_4_VideoData")
+                .build())
+                .enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                        playerActivity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(playerActivity, "网络连接失败", Toast.LENGTH_SHORT)
+                                        .show();
+                                finish();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+
+                    }
+                });
+
         // setText方法必须传入String类型，否则会抛出找不到控件的异常
         ((TextView)findViewById(R.id.tv_open)).setText(videoName);
-        ((TextView)findViewById(R.id.videoId)).setText(String.valueOf(id));
+        ((TextView)findViewById(R.id.videoId)).setText(String.valueOf(videoID));
         ((TextView)findViewById(R.id.videoName)).setText(videoName);
         FlowLayout tagView = findViewById(R.id.videoTags);
         ((TextView)findViewById(R.id.playCnt)).setText(String.valueOf(playCount));
         ((TextView)findViewById(R.id.videoDes)).setText(videoDescription);
         ((TextView)findViewById(R.id.uploadDate)).setText(uploadDate);
-
+        likeCnt.setText(String.valueOf(like));
+        shareCnt.setText(String.valueOf(dispatchCount));
 
         List<String> list = Arrays.asList(videoTag.split("&&"));
         tagView.setAlignByCenter(FlowLayout.AlienState.LEFT);
@@ -293,4 +332,88 @@ public class Player extends AppCompatActivity implements
         play(videoPath);
         Toast.makeText(playerActivity, videoPath, Toast.LENGTH_SHORT);
     }
+
+    public void modifyVideoData(View view) {
+        int viewID = view.getId();
+        FormBody postBody = null;
+        Call call = null;
+        if (viewID == R.id.player_likeButton) {
+            postBody = new FormBody.Builder()
+                    .add("videoID", String.valueOf(videoID))
+                    .add("videoParam", "like")
+                    .build();
+            call = okp.newCall(new Request.Builder()
+                            .url("http://" +mainServSocket+ "/" +war+ "/" + "_4_VideoData")
+                            .post(postBody).build());
+        } else if (viewID == R.id.player_shareButton) {
+            postBody = new FormBody.Builder()
+                    .add("videoID", String.valueOf(videoID))
+                    .add("videoParam", "dispatchCount")
+                    .build();
+            call = okp.newCall(new Request.Builder()
+                    .url("http://" +mainServSocket+ "/" +war+ "/" + "_4_VideoData")
+                    .post(postBody).build());
+        }
+        Call finalCall = call;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // 点赞或转发后返回的消息
+                    Response resp = finalCall.execute();
+                    if (!resp.isSuccessful()) // 判断是否发送成功
+                        throw new IOException();
+
+                    // 确认已修改成功，发送刷新请求
+                    Response refreshResp = okp.newCall(new Request.Builder()
+                                    .url("http://" +mainServSocket+ "/" +war+ "/" + "_4_VideoData?videoID=" + videoID)
+                                    .get()
+                                    .build())
+                                    .execute();
+                    if (!refreshResp.isSuccessful()) // 判断是否发送成功
+                        throw new IOException();
+                    String[] respText = refreshResp.body().string().trim().split("&&");
+
+                    // 根据点击的按钮刷新
+                    if (viewID == R.id.player_likeButton) {
+                        playerActivity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                likeCnt.setText(respText[1].trim().split("=")[1]);
+                                likeButton.setBackgroundResource(R.drawable.baseline_thumb_up_24_hasliked);
+                                likeButton.setClickable(false);
+                                Toast t = new Toast(playerActivity);
+                                t.setText("哼，才不需要你点赞呢！");
+                                t.show();
+                            }
+                        });
+                    } else if (viewID == R.id.player_shareButton) {
+                        playerActivity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                shareCnt.setText(respText[2].trim().split("=")[1]);
+                                Toast t = new Toast(playerActivity);
+                                t.setText("哼，才不需要你转发呢！");
+                                t.show();
+                            }
+                        });
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    playerActivity.runOnUiThread(noInternet);
+                }
+            }
+        }).start();
+
+
+    }
+    Runnable noInternet = new Runnable() {
+        @Override
+        public void run() {
+            Toast t = new Toast(playerActivity);
+            t.setText("欧尼桑的网络真是条杂鱼呢！");
+            t.show();
+        }
+    };
+
 }
