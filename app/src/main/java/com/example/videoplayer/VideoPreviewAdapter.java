@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static com.example.videoplayer.MainActivity.*;
+import static com.example.videoplayer.MainVideoList.*;
 
 public class VideoPreviewAdapter extends RecyclerView.Adapter<VideoPreviewAdapter.mHolder> {
     public List<PreviewBean> mPreviewBeans;
@@ -114,53 +114,4 @@ public class VideoPreviewAdapter extends RecyclerView.Adapter<VideoPreviewAdapte
     public long getItemId(int position) {
         return position;
     }
-
-    boolean isRefreshing = false;
-    public RecyclerView.OnScrollListener scrollToLastListener = new RecyclerView.OnScrollListener() {
-        @Override
-        public void onScrolled(@NonNull @NotNull RecyclerView recyclerView, int dx, int dy) {
-            super.onScrolled(recyclerView, dx, dy);
-
-            LinearLayoutManager lm = (LinearLayoutManager) recyclerView.getLayoutManager();
-            int lastVisiblePosition = lm.findLastVisibleItemPosition();
-            int totalCnt = lm.getItemCount();
-
-            if (lastVisiblePosition == totalCnt-1 && !isRefreshing) {
-                if (totalCnt > 0) {
-                    isRefreshing = true;
-
-                    // 添加数据，一次添加三个
-                    try {
-                        for(int i=0;i<3;i++) {
-                            if (!rs.next()) {
-                                Toast.makeText(mainActivity, "已经加载到底了", Toast.LENGTH_SHORT);
-                                return;
-                            }
-                            PreviewBean pBean = MainActivity.getThreeBeans();
-                            mPreviewBeans.add(pBean);
-
-                            // 刷新adapter数据时要确保RecyclerView不在ComputingLayout
-                            new Handler().post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mPreviewAdapter.notifyDataSetChanged();
-                                }
-                            });
-                        }
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
-
-
-                    TimerTask delay = new TimerTask() {
-                        @Override
-                        public void run() {
-                            isRefreshing = false;
-                        }
-                    };
-                    new Timer().schedule(delay, 1000);
-                }
-            }
-        }
-    };
 }
