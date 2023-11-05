@@ -10,8 +10,6 @@ import okhttp3.*;
 
 import java.io.IOException;
 
-import static com.example.videoplayer.Variable.*;
-
 public class LoginActivity extends AppCompatActivity {
     public static LoginActivity loginActivity;
     public LoginActivity() {
@@ -25,7 +23,7 @@ public class LoginActivity extends AppCompatActivity {
     AlertDialog waiting;
     AlertDialog.Builder agreementBuilder;
     AlertDialog.Builder blankLoginBuilder;
-
+    String message;
 
     OkHttpClient okpClient;
 
@@ -61,7 +59,7 @@ public class LoginActivity extends AppCompatActivity {
                 .build();
 
         Call call = okpClient.newCall(new Request.Builder()
-                .url("http://" +mainServSocket+ "/" +war+ "/" + "_____")
+                .url("http://" +Variable.mainServSocket+ "/" +Variable.war+ "/" + "_____")
                 .post(body)
                 .build());
         waiting = waitingBuilder.show();
@@ -76,8 +74,8 @@ public class LoginActivity extends AppCompatActivity {
                     loginActivity.runOnUiThread(noInternet);
                     return;
                 }
-                String message = resp.body().toString().trim();
-                if (message.equals("true"))
+                message = resp.body().toString().trim();
+                if (message.contains("state=true"))
                     loginActivity.runOnUiThread(loginSucceeded);
                 else
                     loginActivity.runOnUiThread(loginFailed);
@@ -137,6 +135,17 @@ public class LoginActivity extends AppCompatActivity {
             Toast t = new Toast(loginActivity);
             t.setText("登录成功，正在跳转。。。");
             t.show();
+
+            String[] entity = message.trim().split("&&");
+            //todo 解析返回字符串，一共1+7项
+            new UserBean(entity[1].split("=")[1],
+                    entity[2].split("=")[1],
+                    entity[3].split("=")[1],
+                    entity[4].split("=")[1],
+                    entity[5].split("=")[1],
+                    Integer.parseInt(entity[6].split("=")[1]),
+                    entity[7].split("=")[1]);
+            Variable.currentUser = new UserBean("", "", "", "", "", 0, "");
             startActivity(new Intent(loginActivity, MainActivity.class));
         }
     };

@@ -21,9 +21,11 @@ public class MainActivity extends AppCompatActivity {
     }
     Toolbar toolbar;
     ImageView userIcon;
-    UserBean currentUser;
     ViewPager2 viewPager;
     TabLayout tabLayout;
+    private final int VISITOR = -1;
+    private final int NORMAL_USER = 0;
+    private final int MEMBERSHIP = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,9 +41,9 @@ public class MainActivity extends AppCompatActivity {
         userIcon = findViewById(R.id.main_userIcon);
 
         //todo 读取本地user信息，若登录已过期则将user设为null
-        if (currentUser != null) {
+        if (Variable.currentUser != null) {
             //todo 若已登录，则标题显示欢迎界面，点击人头按钮将弹出PopupMenu而不是进入登录界面
-            toolbar.setTitle("欢迎" + currentUser.userNickName + "! ");
+            toolbar.setTitle("欢迎" + Variable.currentUser.userNickName + "! ");
         }
         setSupportActionBar(toolbar);
         initTabLayout();
@@ -55,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void login(View view) {
-        if (currentUser == null)
+        if (Variable.currentUser == null)
             startActivity(new Intent(mainActivity, LoginActivity.class));
     }
 
@@ -96,5 +98,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         viewPager.setCurrentItem(1);
+    }
+
+    public void test(View view) {
+        Intent intent = new Intent(MainActivity.mainActivity, LivePlayer.class);
+        Bundle bundle = new Bundle();
+        intent.putExtras(bundle);
+        startActivity(intent, bundle);
     }
 }

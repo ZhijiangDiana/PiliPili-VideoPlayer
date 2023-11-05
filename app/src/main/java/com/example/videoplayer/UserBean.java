@@ -6,11 +6,11 @@ public class UserBean {
     String userEmail;
     String password;
     String userNickName;
-    String membership;
+    int membership;
     String favorite;
 
     public UserBean(String id, String userName, String userEmail,
-                    String password, String userNickName, String membership, String favorite) {
+                    String password, String userNickName, int membership, String favorite) {
         this.id = id;
         this.userName = userName;
         this.userEmail = userEmail;
@@ -40,7 +40,7 @@ public class UserBean {
         return userNickName;
     }
 
-    public String getMembership() {
+    public int getMembership() {
         return membership;
     }
 

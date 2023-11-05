@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:background="@color/black">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:id="@+id/player">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center">
+            <com.example.videoplayer.MovieView
+                android:id="@+id/mv_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </LinearLayout>
+
+
+        <RelativeLayout
+            android:id="@+id/rl_top"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@color/dock_black">
+
+            <com.example.videoplayer.MarqueeTextView
+                android:id="@+id/tv_open"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:singleLine="true"
+                android:text="视频播放(打开视频)"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:layout_centerInParent="true"/>
+
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:id="@+id/fullscreen"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="20dp"
+                android:src="@drawable/fullscreen_24"
+                android:onClick="fullScreen"/>
+
+
+        </RelativeLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/vc_play"
+            android:visibility="gone"/>
+
+    </RelativeLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/player"
+        android:id="@+id/videoInfo"
+        android:background="@color/white">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/videoName"
+                android:text="视频名称"
+                android:textSize="20sp"
+                android:layout_marginTop="20dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="10dp"
+                android:textColor="@color/black"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/videoUplInfo"
+                android:orientation="horizontal"
+                android:layout_below="@+id/videoName">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:textSize="15sp"
+                    android:text="播放 "
+                    android:textColor="@color/grey"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/playCnt"
+                    android:textSize="15sp"
+                    android:textColor="@color/grey"
+                    android:text="114514"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/videoUplInfo2"
+                android:layout_below="@id/videoUplInfo">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:textSize="15sp"
+                    android:text="编号 id"
+                    android:textColor="@color/grey"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/videoId"
+                    android:textSize="15sp"
+                    android:textColor="@color/grey"
+                    android:text="114514"/>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/videoDes"
+                android:text="视频简介视频简介视频简介视频简介视频简介\n视频简介2视频简介2视频简介2视频简介2视频简介2视频简介2\n视频简介3视频简介3视频简介3视频简介3视频简介3视频简介3视频简介3视频简介3视频简介3视频简介3"
+                android:textSize="15sp"
+                android:layout_below="@+id/videoUplInfo2"
+                android:layout_marginTop="5dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:textColor="@color/grey"/>
+
+        </RelativeLayout>
+
+
+    </ScrollView>
+
+</RelativeLayout>
