@@ -7,9 +7,10 @@ import android.widget.ImageView;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.fragment.app.Fragment;
+import androidx.viewpager2.widget.ViewPager2;
+import com.google.android.material.tabs.TabLayout;
 
-import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +21,11 @@ public class MainActivity extends AppCompatActivity {
     }
     Toolbar toolbar;
     ImageView userIcon;
-    UserBean currentUser;
+    ViewPager2 viewPager;
+    TabLayout tabLayout;
+    private final int VISITOR = -1;
+    private final int NORMAL_USER = 0;
+    private final int MEMBERSHIP = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,10 +41,13 @@ public class MainActivity extends AppCompatActivity {
         userIcon = findViewById(R.id.main_userIcon);
 
         //todo 读取本地user信息，若登录已过期则将user设为null
-        if (currentUser != null) {
+        if (Variable.currentUser != null) {
             //todo 若已登录，则标题显示欢迎界面，点击人头按钮将弹出PopupMenu而不是进入登录界面
-            toolbar.setTitle("欢迎" + currentUser.userNickName + "! ");
+            toolbar.setTitle("欢迎" + Variable.currentUser.userNickName + "! ");
         }
+        setSupportActionBar(toolbar);
+        initTabLayout();
+        initViewPager();
     }
 
     @Override
@@ -49,7 +57,53 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void login(View view) {
-        if (currentUser == null)
+        if (Variable.currentUser == null)
             startActivity(new Intent(mainActivity, LoginActivity.class));
+    }
+
+    private void initTabLayout() {
+        tabLayout = findViewById(R.id.main_tab);
+        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                viewPager.setCurrentItem(tab.getPosition());
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
+    }
+
+    private void initViewPager() {
+        viewPager = findViewById(R.id.main_viewPager);
+
+        List<Fragment> fragmentList = new ArrayList<>(11);
+        fragmentList.add(new MainLiveList());
+        fragmentList.add(new MainVideoList());
+
+        FragmentPagerAdapter adapter = new FragmentPagerAdapter(getSupportFragmentManager(), getLifecycle(), fragmentList);
+        viewPager.setAdapter(adapter);
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                tabLayout.getTabAt(position).select();
+            }
+        });
+        viewPager.setCurrentItem(1);
+    }
+
+    public void test(View view) {
+        Intent intent = new Intent(MainActivity.mainActivity, LivePlayer.class);
+        Bundle bundle = new Bundle();
+        intent.putExtras(bundle);
+        startActivity(intent, bundle);
     }
 }

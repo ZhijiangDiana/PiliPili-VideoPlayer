@@ -103,13 +103,14 @@ public class Player extends AppCompatActivity implements
         int playCount = bundle.getInt("playCount") + 1;
         int like = bundle.getInt("like");
         int dispatchCount = bundle.getInt("dispatchCount");
-        videoPath = "http://" + videoServSocket + "/vod/" + videoName + "_1080p.mp4" + "/index.m3u8";
+        videoPath = "http://" + videoServSocket + "/vod/" + videoName + "_1080p.mp4" + "/index.m3u8"; //"http://121.41.1.13:8082/hls/CaiLiu.m3u8";
 
         FormBody body = new FormBody.Builder()
                 .add("videoID", String.valueOf(videoID))
                 .add("videoParam", "playCount")
                 .build();
 
+        // 播放量+1
         okp.newCall(new Request.Builder()
                 .post(body)
                 .url("http://" +mainServSocket+ "/" +war+ "/" + "_4_VideoData")

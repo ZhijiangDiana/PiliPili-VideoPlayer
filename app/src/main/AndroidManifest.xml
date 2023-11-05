@@ -17,10 +17,14 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".LivePlayer"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:exported="false"
+            android:theme="@style/FullScreen"/>
+        <activity
             android:name=".LoginActivity"
             android:exported="false"
-            android:theme="@style/LightTheme"/>
-        <!-- android4.0之后刷新豁免需要加上screenSize -->
+            android:theme="@style/LightTheme"/> <!-- android4.0之后刷新豁免需要加上screenSize -->
         <activity
             android:name=".Player"
             android:configChanges="orientation|keyboardHidden|screenSize"
