@@ -33,6 +33,10 @@
             android:theme="@style/FullScreen"/>
         <activity
             android:name=".MainActivity"
+            android:exported="false"
+            android:theme="@style/LightTheme"/>
+        <activity
+            android:name=".StartupActivity"
             android:exported="true"
             android:theme="@style/LightTheme">
             <intent-filter>

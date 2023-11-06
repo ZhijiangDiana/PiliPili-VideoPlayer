@@ -1,16 +1,19 @@
 package com.example.videoplayer;
 
 import android.content.Intent;
+import android.util.Log;
 import android.view.View;
 import android.widget.*;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import com.google.gson.Gson;
 import okhttp3.*;
 
 import java.io.IOException;
 
 public class LoginActivity extends AppCompatActivity {
+    private final String TAG = "LoginActivity";
     public static LoginActivity loginActivity;
     public LoginActivity() {
         loginActivity = LoginActivity.this;
@@ -43,7 +46,8 @@ public class LoginActivity extends AppCompatActivity {
                 .setView(R.layout.waiting_for_server)
                 .setCancelable(false);
         agreementBuilder = new AlertDialog.Builder(loginActivity)
-                .setView(R.layout.agreement_alertdialog);
+                .setMessage("114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514114514")
+                .setTitle("用户协议");
         blankLoginBuilder = new AlertDialog.Builder(loginActivity);
 
     }
@@ -59,7 +63,7 @@ public class LoginActivity extends AppCompatActivity {
                 .build();
 
         Call call = okpClient.newCall(new Request.Builder()
-                .url("http://" +Variable.mainServSocket+ "/" +Variable.war+ "/" + "_____")
+                .url("http://" +Variable.mainServSocket+ "/" +Variable.war+ "/" + "_4_VideoPlayerLogin")
                 .post(body)
                 .build());
         waiting = waitingBuilder.show();
@@ -74,11 +78,18 @@ public class LoginActivity extends AppCompatActivity {
                     loginActivity.runOnUiThread(noInternet);
                     return;
                 }
-                message = resp.body().toString().trim();
-                if (message.contains("state=true"))
-                    loginActivity.runOnUiThread(loginSucceeded);
-                else
+                try {
+                    message = resp.body().string().trim();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    resp.close();
+                }
+                if (message.equals("false"))
                     loginActivity.runOnUiThread(loginFailed);
+                else
+                    loginActivity.runOnUiThread(loginSucceeded);
+
             }
         }).start();
 
@@ -136,17 +147,11 @@ public class LoginActivity extends AppCompatActivity {
             t.setText("登录成功，正在跳转。。。");
             t.show();
 
-            String[] entity = message.trim().split("&&");
-            //todo 解析返回字符串，一共1+7项
-            new UserBean(entity[1].split("=")[1],
-                    entity[2].split("=")[1],
-                    entity[3].split("=")[1],
-                    entity[4].split("=")[1],
-                    entity[5].split("=")[1],
-                    Integer.parseInt(entity[6].split("=")[1]),
-                    entity[7].split("=")[1]);
-            Variable.currentUser = new UserBean("", "", "", "", "", 0, "");
-            startActivity(new Intent(loginActivity, MainActivity.class));
+            Gson json = new Gson();
+            Log.e(TAG, message);
+            Variable.currentUser = json.fromJson(message.trim(), UserBean.class);
+
+            finish();
         }
     };
 
