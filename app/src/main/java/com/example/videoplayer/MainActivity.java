@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.tabs.TabLayout;
@@ -23,9 +24,9 @@ public class MainActivity extends AppCompatActivity {
     ImageView userIcon;
     ViewPager2 viewPager;
     TabLayout tabLayout;
-    private final int VISITOR = -1;
-    private final int NORMAL_USER = 0;
-    private final int MEMBERSHIP = 1;
+    public static final int VISITOR = -1;
+    public static final int NORMAL_USER = 0;
+    public static final int MEMBERSHIP = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,14 +41,20 @@ public class MainActivity extends AppCompatActivity {
         toolbar = findViewById(R.id.main_toolbar);
         userIcon = findViewById(R.id.main_userIcon);
 
-        //todo 读取本地user信息，若登录已过期则将user设为null
-        if (Variable.currentUser != null) {
-            //todo 若已登录，则标题显示欢迎界面，点击人头按钮将弹出PopupMenu而不是进入登录界面
-            toolbar.setTitle("欢迎" + Variable.currentUser.userNickName + "! ");
-        }
-        setSupportActionBar(toolbar);
         initTabLayout();
         initViewPager();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        setSupportActionBar(toolbar);
+        //todo 读取本地user信息，若登录已过期则将user设为null
+        if (Variable.currentUser.getId() != null) {
+            //todo 若已登录，则标题显示欢迎界面，点击人头按钮将弹出PopupMenu而不是进入登录界面
+            toolbar.setTitle("欢迎" + Variable.currentUser.getUserNickName() + "! ");
+        }
     }
 
     @Override
@@ -57,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void login(View view) {
-        if (Variable.currentUser == null)
+        if (Variable.currentUser.getId() == null)
             startActivity(new Intent(mainActivity, LoginActivity.class));
     }
 

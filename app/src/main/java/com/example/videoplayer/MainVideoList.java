@@ -133,9 +133,10 @@ public class MainVideoList extends Fragment {
         int playCount = rs.getInt("playCount");
         int like = rs.getInt("like");
         int dispatchCount = rs.getInt("dispatchCount");
+        int memberOnly = rs.getInt("memberOnly");
 
         PreviewBean pBean = new PreviewBean(id, videoName, videoTag, videoDescription, videoThumb,
-                uploadDate, playCount, like, dispatchCount);
+                uploadDate, playCount, like, dispatchCount, memberOnly);
         return pBean;
     }
 
