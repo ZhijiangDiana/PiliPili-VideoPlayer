@@ -1,13 +1,13 @@
 package com.example.videoplayer;
 
 public class UserBean {
-    String id;
-    String userName;
-    String userEmail;
-    String password;
-    String userNickName;
-    int membership;
-    String favorite;
+    private String id;
+    private String userName;
+    private String userEmail;
+    private String password;
+    private String userNickName;
+    private int membership;
+    private String favorite;
 
     public UserBean(String id, String userName, String userEmail,
                     String password, String userNickName, int membership, String favorite) {
@@ -19,6 +19,8 @@ public class UserBean {
         this.membership = membership;
         this.favorite = favorite;
     }
+
+    public UserBean() {}
 
     public String getId() {
         return id;

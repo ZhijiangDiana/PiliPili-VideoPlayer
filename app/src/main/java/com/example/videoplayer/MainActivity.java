@@ -51,9 +51,9 @@ public class MainActivity extends AppCompatActivity {
 
         setSupportActionBar(toolbar);
         //todo 读取本地user信息，若登录已过期则将user设为null
-        if (Variable.currentUser != null) {
+        if (Variable.currentUser.getId() != null) {
             //todo 若已登录，则标题显示欢迎界面，点击人头按钮将弹出PopupMenu而不是进入登录界面
-            toolbar.setTitle("欢迎" + Variable.currentUser.userNickName + "! ");
+            toolbar.setTitle("欢迎" + Variable.currentUser.getUserNickName() + "! ");
         }
     }
 
@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void login(View view) {
-        if (Variable.currentUser == null)
+        if (Variable.currentUser.getId() == null)
             startActivity(new Intent(mainActivity, LoginActivity.class));
     }
 

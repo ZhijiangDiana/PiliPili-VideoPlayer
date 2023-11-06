@@ -1,5 +1,6 @@
 package com.example.videoplayer;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -8,10 +9,12 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -56,6 +59,12 @@ public class VideoPreviewAdapter extends RecyclerView.Adapter<VideoPreviewAdapte
                 int playCount = pBean.getPlayCount();
                 int like = pBean.getLike();
                 int dispatchCount = pBean.getDispatchCount();
+                int memberOnly = pBean.getMemberOnly();
+
+                if (Variable.currentUser.getMembership() < memberOnly) {
+                    needMembership();
+                    return;
+                }
 
                 bundle.putInt("id", _id);
                 bundle.putString("videoName", videoName);
@@ -114,4 +123,31 @@ public class VideoPreviewAdapter extends RecyclerView.Adapter<VideoPreviewAdapte
     public long getItemId(int position) {
         return position;
     }
+    private void needMembership() {
+
+        AlertDialog.Builder memOnlyBuilder = new AlertDialog.Builder(MainActivity.mainActivity);
+        memOnlyBuilder.setTitle("此视频仅限会员观看")
+                .setMessage("是否充值会员\n" +
+                        "    会员连续包月每月仅需19.19元\n" +
+                        "    连续包年每月仅需11.45元！\n")
+                .setCancelable(false)
+                .setPositiveButton("确认", yes)
+                .setNegativeButton("取消", no)
+                .show();
+    }
+
+    private final DialogInterface.OnClickListener yes = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+
+        }
+    };
+
+    private final DialogInterface.OnClickListener no = new DialogInterface.OnClickListener() {
+
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            dialog.cancel();
+        }
+    };
 }

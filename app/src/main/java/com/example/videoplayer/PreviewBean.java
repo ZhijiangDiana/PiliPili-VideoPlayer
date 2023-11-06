@@ -10,8 +10,9 @@ public class PreviewBean {
     private int playCount;
     private int like;
     private int dispatchCount;
+    private int memberOnly;
 
-    public PreviewBean(int id, String videoName, String videoTag, String videoDescription, byte[] videoThumb, String uploadDate, int playCount, int like, int dispatchCount) {
+    public PreviewBean(int id, String videoName, String videoTag, String videoDescription, byte[] videoThumb, String uploadDate, int playCount, int like, int dispatchCount, int memberOnly) {
         this.id = id;
         this.videoName = videoName;
         this.videoTag = videoTag;
@@ -21,6 +22,7 @@ public class PreviewBean {
         this.playCount = playCount;
         this.like = like;
         this.dispatchCount = dispatchCount;
+        this.memberOnly = memberOnly;
     }
 
     public int getId() {
@@ -57,5 +59,8 @@ public class PreviewBean {
 
     public int getDispatchCount() {
         return dispatchCount;
+    }
+    public int getMemberOnly() {
+        return memberOnly;
     }
 }
