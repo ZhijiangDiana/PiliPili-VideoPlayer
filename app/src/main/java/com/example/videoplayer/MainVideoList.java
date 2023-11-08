@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
@@ -32,6 +33,7 @@ public class MainVideoList extends Fragment {
     LinearLayout loading;
     TextView failed;
     RecyclerView videoList;
+    SwipeRefreshLayout swipeRefresh;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -103,6 +105,9 @@ public class MainVideoList extends Fragment {
                         mRecyclerView.addOnScrollListener(scrollToLastListener);
                         // 设置适配器
                         mRecyclerView.setAdapter(mPreviewAdapter);
+
+                        swipeRefresh = root.findViewById(R.id.MainVideoList_swipeRefresh);
+                        swipeRefresh.setOnRefreshListener(refresh);
                     }
                 });
             }
@@ -122,6 +127,22 @@ public class MainVideoList extends Fragment {
             e.printStackTrace();
         }
     }
+
+    SwipeRefreshLayout.OnRefreshListener refresh = new SwipeRefreshLayout.OnRefreshListener() {
+        @Override
+        public void onRefresh() {
+            mPreviewAdapter.mPreviewBeans.clear();
+            // 刷新adapter数据时要确保RecyclerView不在ComputingLayout
+            new Handler().post(new Runnable() {
+                @Override
+                public void run() {
+                    mPreviewAdapter.notifyDataSetChanged();
+                }
+            });
+            new Thread(loadingRunnable).start();
+
+        }
+    };
 
     public static PreviewBean getBeans(ResultSet rs) throws SQLException {
         int id = rs.getInt("id");
@@ -145,7 +166,11 @@ public class MainVideoList extends Fragment {
         public void run() {
             // 添加数据，一次添加三个
             try {
-                int first = mPreviewAdapter.mPreviewBeans.get(mPreviewList.size()-1).getId()+1;
+                int first;
+                if (mPreviewAdapter.mPreviewBeans.isEmpty())
+                    first = 1;
+                else
+                    first = mPreviewAdapter.mPreviewBeans.get(mPreviewAdapter.mPreviewBeans.size()-1).getId()+1;
                 String query = "SELECT * FROM VideoDB WHERE id IN" +
                         "("+first+"," +
                         "(SELECT id FROM VideoDB WHERE id>"+first+" ORDER BY id LIMIT 1)," +
@@ -165,7 +190,7 @@ public class MainVideoList extends Fragment {
                         break;
                     }
                     // 加载出一个视频，放到list里
-                    PreviewBean pBean = MainVideoList.getBeans(rs);
+                    PreviewBean pBean = getBeans(rs);
                     mPreviewAdapter.mPreviewBeans.add(pBean);
                 }
                 rs.close();
@@ -195,6 +220,7 @@ public class MainVideoList extends Fragment {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            swipeRefresh.setRefreshing(false);
         }
     };
     private Thread loadingThread;
