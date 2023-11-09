@@ -26,6 +26,10 @@
             android:exported="false"
             android:theme="@style/LightTheme"/> <!-- android4.0之后刷新豁免需要加上screenSize -->
         <activity
+            android:name=".RegisterActivity"
+            android:exported="false"
+            android:theme="@style/LightTheme"/>
+        <activity
             android:name=".Player"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:exported="false"

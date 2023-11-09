@@ -145,7 +145,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/hline1"
         app:layout_constraintBottom_toTopOf="@+id/guideline7"
-        android:onClick="Register"/>
+        android:onClick="toRegister"/>
 
     <Button
         android:text="登录"

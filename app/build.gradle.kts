@@ -31,6 +31,7 @@ android {
 dependencies {
     implementation("mysql:mysql-connector-java:5.1.49")
     implementation("com.squareup.okhttp3:okhttp:4.9.0")
+    implementation("com.danikula:videocache:2.7.1")
     implementation("com.google.code.gson:gson:2.8.9")
     implementation("com.tencent.mm.opensdk:wechat-sdk-android:6.8.0")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")

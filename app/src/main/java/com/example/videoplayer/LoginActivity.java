@@ -158,4 +158,8 @@ public class LoginActivity extends AppCompatActivity {
     public void PopupAgreement(View view) {
         agreementBuilder.show();
     }
+
+    public void toRegister(View view) {
+        startActivity(new Intent(loginActivity, RegisterActivity.class));
+    }
 }
