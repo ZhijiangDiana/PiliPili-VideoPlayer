@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
@@ -23,15 +24,12 @@ import java.util.TimerTask;
 
 public class MainVideoList extends Fragment {
     private View root;
-    public static Connection conn = null;
-    public static Statement stmt = null;
-
     public static RecyclerView mRecyclerView;
     public static VideoPreviewAdapter mPreviewAdapter;
-    private List<PreviewBean> mPreviewList = new ArrayList<>(114);
     LinearLayout loading;
     TextView failed;
     RecyclerView videoList;
+    SwipeRefreshLayout swipeRefresh;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -39,14 +37,6 @@ public class MainVideoList extends Fragment {
         if (android.os.Build.VERSION.SDK_INT > 9) {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
-        }
-
-        // 初始化数据库连接
-        try {
-            conn = DriverManager.getConnection("jdbc:mysql://1.15.179.230:3306/VideoPlayer?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC", "root", "114514");
-            stmt = conn.createStatement();
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
 
     }
@@ -62,66 +52,35 @@ public class MainVideoList extends Fragment {
         loading = root.findViewById(R.id.MainVideoList_loading);
         failed = root.findViewById(R.id.MainVideoList_failed);
         videoList = root.findViewById(R.id.recyclerView);
+        swipeRefresh = root.findViewById(R.id.MainVideoList_swipeRefresh);
+        swipeRefresh.setOnRefreshListener(refresh);
 
         // 异步添加数据，一次添加三个
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    ResultSet rs = stmt.executeQuery("SELECT MIN(id) FROM VideoDB");
-                    rs.next();
-                    int first = rs.getInt("MIN(id)");
-                    String query = "SELECT * FROM VideoDB WHERE id IN" +
-                            "("+first+"," +
-                            "(SELECT id FROM VideoDB WHERE id>"+first+" ORDER BY id LIMIT 1)," +
-                            "(SELECT id FROM VideoDB WHERE id>(SELECT id FROM VideoDB WHERE id>"+first+" ORDER BY id LIMIT 1) " +
-                            "ORDER BY id LIMIT 1)) ORDER BY id";
-                    rs = stmt.executeQuery(query);
-                    for(int i=0;i<3;i++) {
-                        if (!rs.next())
-                            return;
-
-                        PreviewBean pBean = getBeans(rs);
-                        mPreviewList.add(pBean);
-                    }
-                    rs.close();
-                } catch (NullPointerException|SQLException e) {
-                    e.printStackTrace();
-                    // 无网络连接
-                    noInternet();
-                    return;
-                }
-                // 加载成功，正在加载视频列表
-                MainActivity.mainActivity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        videoList.setVisibility(ViewGroup.VISIBLE);
-                        loading.setVisibility(ViewGroup.GONE);
-                        failed.setVisibility(ViewGroup.GONE);
-                        // 初始化适配器
-                        mPreviewAdapter = new VideoPreviewAdapter(mPreviewList);
-                        mRecyclerView.addOnScrollListener(scrollToLastListener);
-                        // 设置适配器
-                        mRecyclerView.setAdapter(mPreviewAdapter);
-                    }
-                });
-            }
-        }).start();
+        new Thread(firstLoadRunnable).start();
 
 
         return root;
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        try {
-            conn.close();
-            stmt.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
+    SwipeRefreshLayout.OnRefreshListener refresh = new SwipeRefreshLayout.OnRefreshListener() {
+        @Override
+        public void onRefresh() {
+            if (mPreviewAdapter != null && mPreviewAdapter.mPreviewBeans != null)
+                mPreviewAdapter.mPreviewBeans.clear();
+            // 刷新adapter数据时要确保RecyclerView不在ComputingLayout
+            new Handler().post(new Runnable() {
+                @Override
+                public void run() {
+                    if (mPreviewAdapter != null && mPreviewAdapter.mPreviewBeans != null)
+                        mPreviewAdapter.notifyDataSetChanged();
+                }
+            });
+            if (mPreviewAdapter != null && mPreviewAdapter.mPreviewBeans != null)
+                new Thread(firstLoadRunnable).start();
+            else
+                new Thread(loadingRunnable).start();
         }
-    }
+    };
 
     public static PreviewBean getBeans(ResultSet rs) throws SQLException {
         int id = rs.getInt("id");
@@ -144,8 +103,17 @@ public class MainVideoList extends Fragment {
         @Override
         public void run() {
             // 添加数据，一次添加三个
+            Connection conn = null;
             try {
-                int first = mPreviewAdapter.mPreviewBeans.get(mPreviewList.size()-1).getId()+1;
+                int first;
+                if (mPreviewAdapter.mPreviewBeans.isEmpty())
+                    first = 1;
+                else
+                    first = mPreviewAdapter.mPreviewBeans.get(mPreviewAdapter.mPreviewBeans.size()-1).getId()+1;
+
+                conn = DriverManager.getConnection("jdbc:mysql://1.15.179.230:3306/VideoPlayer?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC", "root", "114514");
+                Statement stmt = conn.createStatement();
+
                 String query = "SELECT * FROM VideoDB WHERE id IN" +
                         "("+first+"," +
                         "(SELECT id FROM VideoDB WHERE id>"+first+" ORDER BY id LIMIT 1)," +
@@ -165,13 +133,26 @@ public class MainVideoList extends Fragment {
                         break;
                     }
                     // 加载出一个视频，放到list里
-                    PreviewBean pBean = MainVideoList.getBeans(rs);
+                    PreviewBean pBean = getBeans(rs);
                     mPreviewAdapter.mPreviewBeans.add(pBean);
                 }
                 rs.close();
-            } catch (NullPointerException|SQLException e) {
+            } catch (NullPointerException | SQLException e) {
                 e.printStackTrace();
                 noInternet();
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                    e.printStackTrace();
+                }
+                swipeRefresh.setRefreshing(false);
+            } finally {
+                try {
+                    if (conn != null)
+                        conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
             MainActivity.mainActivity.runOnUiThread(new Runnable() {
                 @Override
@@ -184,7 +165,8 @@ public class MainVideoList extends Fragment {
                     new Handler().post(new Runnable() {
                         @Override
                         public void run() {
-                            mPreviewAdapter.notifyDataSetChanged();
+                            if (mPreviewAdapter != null)
+                                mPreviewAdapter.notifyDataSetChanged();
                         }
                     });
                 }
@@ -194,6 +176,69 @@ public class MainVideoList extends Fragment {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
+            }
+            swipeRefresh.setRefreshing(false);
+        }
+    };
+
+    Runnable firstLoadRunnable = new Runnable() {
+        @Override
+        public void run() {
+            Connection conn = null;
+            try {
+                conn = DriverManager.getConnection("jdbc:mysql://1.15.179.230:3306/VideoPlayer?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC", "root", "114514");
+                Statement stmt = conn.createStatement();
+
+                ResultSet rs = stmt.executeQuery("SELECT MIN(id) FROM VideoDB");
+                rs.next();
+                int first = rs.getInt("MIN(id)");
+                String query = "SELECT * FROM VideoDB WHERE id IN" +
+                        "("+first+"," +
+                        "(SELECT id FROM VideoDB WHERE id>"+first+" ORDER BY id LIMIT 1)," +
+                        "(SELECT id FROM VideoDB WHERE id>(SELECT id FROM VideoDB WHERE id>"+first+" ORDER BY id LIMIT 1) " +
+                        "ORDER BY id LIMIT 1)) ORDER BY id";
+                rs = stmt.executeQuery(query);
+                List<PreviewBean> mPreviewList = new ArrayList<>(114);
+                for(int i=0;i<3;i++) {
+                    if (!rs.next())
+                        return;
+
+                    PreviewBean pBean = getBeans(rs);
+                    mPreviewList.add(pBean);
+                }
+                rs.close();
+                // 加载成功，正在加载视频列表
+                MainActivity.mainActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        videoList.setVisibility(ViewGroup.VISIBLE);
+                        loading.setVisibility(ViewGroup.GONE);
+                        failed.setVisibility(ViewGroup.GONE);
+                        // 初始化适配器
+                        mPreviewAdapter = new VideoPreviewAdapter(mPreviewList);
+                        mRecyclerView.addOnScrollListener(scrollToLastListener);
+                        // 设置适配器
+                        mRecyclerView.setAdapter(mPreviewAdapter);
+                    }
+                });
+            } catch (NullPointerException|SQLException e) {
+                e.printStackTrace();
+                // 无网络连接
+                noInternet();
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                    e.printStackTrace();
+                }
+                swipeRefresh.setRefreshing(false);
+                return;
+            } finally {
+                try {
+                    if (conn != null)
+                        conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
         }
     };
