@@ -15,9 +15,11 @@ import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import com.danikula.videocache.HttpProxyCacheServer;
 import layout.FlowLayout;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
+import utils.CacheUtils;
 import utils.DisplayUtils;
 import utils.ViewUtils;
 
@@ -53,6 +55,7 @@ public class Player extends AppCompatActivity implements
     private TextView shareCnt;
     OkHttpClient okp;
     int videoID;
+    HttpProxyCacheServer proxy;
 
     @SuppressLint("ResourceAsColor")
     @Override
@@ -82,6 +85,7 @@ public class Player extends AppCompatActivity implements
                 true);
 
         okp = new OkHttpClient().newBuilder().build();
+        proxy = CacheUtils.getProxy(playerActivity);
 
 
         // 当有保存的进度时，继续播放
@@ -103,7 +107,8 @@ public class Player extends AppCompatActivity implements
         int playCount = bundle.getInt("playCount") + 1;
         int like = bundle.getInt("like");
         int dispatchCount = bundle.getInt("dispatchCount");
-        videoPath = "http://" + videoServSocket + "/vod/" + videoName + "_1080p.mp4" + "/index.m3u8"; //"http://121.41.1.13:8082/hls/CaiLiu.m3u8";
+//        videoPath = "http://" + videoServSocket + "/vod/" + videoName + "_1080p.mp4" + "/index.m3u8"; //"http://121.41.1.13:8082/hls/CaiLiu.m3u8";
+        videoPath = "http://" + videoServSocket + "/" + videoName + "_1080p.mp4";
 
         FormBody body = new FormBody.Builder()
                 .add("videoID", String.valueOf(videoID))
@@ -155,7 +160,9 @@ public class Player extends AppCompatActivity implements
             }
         });
 
-        play(videoPath);
+        String cachePath = proxy.getProxyUrl(videoPath);
+        play(cachePath);
+//        play(videoPath);
 
         // 根据视频缩略图制定全屏规则
         thumb = BitmapFactory.decodeByteArray(videoThumb, 0, videoThumb.length, new BitmapFactory.Options());
@@ -223,7 +230,7 @@ public class Player extends AppCompatActivity implements
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.tv_open) {
-//            play("http://1.15.179.230:8081/TruE-%E9%BB%84%E9%BE%84_480p.mp4");
+//            play("http://49.235.108.192:8080/super/v1.mp4");
         }
     }
 
@@ -320,7 +327,9 @@ public class Player extends AppCompatActivity implements
         if (videoPath.contains("_480p.mp4"))
             return;
         videoPath = videoPath.replaceAll("_1080p.mp4", "_480p.mp4");
-        play(videoPath);
+        String cachePath = proxy.getProxyUrl(videoPath);
+        play(cachePath);
+//        play(videoPath);
         Toast.makeText(playerActivity, videoPath, Toast.LENGTH_SHORT);
     }
 
@@ -330,7 +339,9 @@ public class Player extends AppCompatActivity implements
         if (videoPath.contains("_1080p.mp4"))
             return;
         videoPath = videoPath.replaceAll("_480p.mp4", "_1080p.mp4");
-        play(videoPath);
+        String cachePath = proxy.getProxyUrl(videoPath);
+        play(cachePath);
+//        play(videoPath);
         Toast.makeText(playerActivity, videoPath, Toast.LENGTH_SHORT);
     }
 
